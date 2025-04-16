@@ -232,4 +232,6 @@ class GraphQLWs:
                     continue
                 sub.complete = True
                 sub.event.set()
+            elif message["type"] == "ping":
+                await self.ws.send(json.dumps({"type": "pong"}).encode())
 
