@@ -7,7 +7,7 @@ presense = machine.Pin(config.PRESENCE_PIN)
 
 #Select ADC input 0 (GPIO26)
 adc = machine.ADC(config.AIR_ADC_PIN)
-din = machine.Pin(config.AIR_DIN_PIN, machine.Pin.IN)
+#din = machine.Pin(config.AIR_DIN_PIN, machine.Pin.IN)
 conversion_factor = 3.3 / (65535)
 
 def read_sensors():
@@ -15,7 +15,8 @@ def read_sensors():
     return {
         "temperature": dht.temperature(),
         "humidity": dht.humidity(),
-        "smoke_detected": din.value() == 1,
+#        "smoke_detected": din.value() == 1,
+        "smoke_detected": False,
         "smoke_volts": adc.read_u16() * conversion_factor,
         "occupancy": presense.value() == 1
     }

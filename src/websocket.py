@@ -148,6 +148,56 @@ class Subscription:
     async def wait(self):
         await self.event.wait()
         return self.data
+    
+class SubIterable:
+
+    """
+    Micropython does not support async generators (PEP 525),
+    SubIterable is intended to perform the same as:
+    
+    while True:
+        queue = await sub.wait()
+    
+        while len(queue):
+            yield queue.popleft()
+    
+        if sub.complete:
+            break
+    
+        sub.event.clear()
+    
+    del self.subscriptions[id]
+    return
+    """
+
+    def __init__(self, sub, onend):
+        self.sub = sub
+        self.onend = onend
+
+    def __aiter__(self):
+        return self
+    
+    async def __anext__(self):
+        queue = self.sub.data
+
+        if len(queue):
+            return queue.popleft()
+
+        if self.sub.complete:
+            self.onend()
+            raise StopAsyncIteration()
+
+        self.sub.event.clear()
+        queue = await self.sub.wait()
+
+        if len(queue):
+            return queue.popleft()
+
+        if self.sub.complete:
+            self.onend()
+            raise StopAsyncIteration()
+            
+        raise RuntimeError()
 
 class GraphQLWs:
     def __init__(self, ws):
@@ -178,7 +228,7 @@ class GraphQLWs:
         data = await sub.wait()
         del self.subscriptions[id]
         return data
-    
+
     async def subscribe(self, payload):
         id = self.next_count()
         sub = Subscription(True)
@@ -191,22 +241,9 @@ class GraphQLWs:
             "payload": payload
         }
 
-
         await self.ws.write(json.dumps(message).encode())
-        while True:
-            queue = await sub.wait()
 
-            while len(queue):
-                data = queue.popleft()
-                yield data
-
-            if sub.complete:
-                break
-
-            sub.event.clear()
-
-        del self.subscriptions[id]
-        return
+        return SubIterable(sub, lambda: self.subscriptions.pop(id))
     
     async def handler(self):
         while True:

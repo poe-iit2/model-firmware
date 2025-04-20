@@ -1,0 +1,4 @@
+# These requirements are only for scripts under utils/
+
+esptool
+mpremote

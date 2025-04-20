@@ -22,7 +22,8 @@ async def connnect_to_wifi():
         wifi.active(True)
         wifi.connect(config.WIFI_SSID, config.WIFI_PASSWORD)
     while not wifi.isconnected():
-        await asyncio.sleep(0.1)
+        print(wifi.status())  
+        await asyncio.sleep(1)
 
 async def main():
     await connnect_to_wifi()
@@ -54,7 +55,7 @@ async def main():
     }
   }
 }"""}))
-    async for s in gql.subscribe({"query": "subscription MySubscription { greetings }"}):
+    async for s in await gql.subscribe({"query": "subscription MySubscription { greetings }"}):
         print(s)
     for i in range(5):
         await asyncio.sleep(2)

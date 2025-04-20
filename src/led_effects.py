@@ -1,11 +1,10 @@
-import network
 import asyncio
 import neopixel
 import time
 import math
 import machine
 
-leds = neopixel.NeoPixel(machine.Pin(1), 5)
+leds = neopixel.NeoPixel(machine.Pin(18), 70)
 
 def led_solid(color):
     def update(leds, t, off=0, l=0):
@@ -16,7 +15,7 @@ def led_solid(color):
 def led_pulse(color, dur=1):
     def update(leds, x, off=0, l=0):
         y = (math.sin(x * 2 * math.pi / dur) + 1) / 2
-        c = (color[0] * y, color[1] * y, color[2] * y)
+        c = (int(color[0] * y), int(color[1] * y), int(color[2] * y))
         for i in range(off, off+l):
             leds[i] = c
     return update
@@ -40,8 +39,23 @@ async def led_engine(f, l=0):
 
 async def main():
     await led_engine(LedSplitter((
-        (led_pulse((255, 128, 0)), 1),
-        (led_solid((0, 0, 10)), 4)
+        # (led_pulse((128, 64, 0)), 5),
+        # (led_solid((0, 0, 10)), 5),
+        # (led_pulse((128, 64, 0)), 5),
+        # (led_solid((0, 0, 10)), 5),
+        # (led_pulse((128, 64, 0)), 5),
+        # (led_solid((0, 0, 10)), 5),
+        # (led_pulse((128, 64, 0)), 5),
+        # (led_solid((0, 0, 10)), 5),
+        # (led_pulse((128, 64, 0)), 5),
+        # (led_solid((0, 0, 10)), 5),
+        
+        (led_solid((10, 10, 10)), 49),
+        # (led_pulse((128, 64, 0)), 5),
+        # (led_solid((0, 0, 10)), 5),
+        # (led_pulse((128, 64, 0)), 5),
+        # (led_solid((0, 0, 10)), 5),
+
         )))
 
 asyncio.run(main())
