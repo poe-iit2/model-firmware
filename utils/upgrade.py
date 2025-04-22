@@ -7,9 +7,9 @@ import argparse
 
 files = [
     "config.py",
+    "device.py",
     "led_effects.py",
     "main.py",
-    "sensors.py",
     "websocket.py"
 ]
 

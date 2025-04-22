@@ -2,7 +2,7 @@ import config
 import asyncio
 import network
 import websocket
-import sensors
+from device import Device 
 
 wifi = network.WLAN(network.STA_IF)
 
@@ -55,21 +55,11 @@ async def main():
     }
   }
 }"""}))
-    async for s in await gql.subscribe({"query": "subscription MySubscription { greetings }"}):
-        print(s)
-    for i in range(5):
-        await asyncio.sleep(2)
-        readings = sensors.read_sensors()
-        print(await gql.query({
-            "query":update_sensors_query,
-            "variables": {
-                "id": 1,
-                "airQuality": readings["smoke_volts"],
-                "humidity": readings["humidity"],
-                "temperature": readings["temperature"],
-                "occupied": readings["occupancy"]
-            }
-        }))
+    for c in config.devices:
+        device = Device(c, gql)
+        asyncio.create_task(device.led_update_handler())
+        asyncio.create_task(device.read_sensors_loop())
 
-    
-asyncio.run(main())
+loop = asyncio.new_event_loop()
+loop.create_task(main())
+loop.run_forever() # TODO make use a task group instead of a run_forever?
