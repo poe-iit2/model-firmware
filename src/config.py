@@ -8,18 +8,20 @@ GRAPHQL_PATH = "/"
 devices = (
     {
         "id": 0,
-        "DHT_PIN": 26,
+        #"DHT_PIN": 26,
         "PRESENCE_PIN": 35,
-        # "PRESENCE_TX_PIN": 3,
-        # "PRESENSE_RX_PIN": 4,
+        "PRESENCE_TX_PIN": 18,
+        "PRESENCE_RX_PIN": 5,
+        "PRESENCE_UART_CONTROLLER": 2
         # "AIR_DIN_PIN": 5,
-        "AIR_ADC_PIN": 32
+        #"AIR_ADC_PIN": 32
     }, {
         "id": 1,
         # "DHT_PIN": 26,
         # "PRESENCE_PIN": 35,
-        # "PRESENCE_TX_PIN": 3,
-        # "PRESENSE_RX_PIN": 4,
+        # "PRESENCE_TX_PIN": 1,
+        # "PRESENCE_RX_PIN": 3,
+        # "PRESENCE_UART_CONTROLLER": 0,
         # "AIR_DIN_PIN": 5,
         # "AIR_ADC_PIN": 32
     }

@@ -59,6 +59,7 @@ async def main():
         device = Device(c, gql)
         asyncio.create_task(device.led_update_handler())
         asyncio.create_task(device.read_sensors_loop())
+        asyncio.create_task(device.presence_handler())
 
 loop = asyncio.new_event_loop()
 loop.create_task(main())

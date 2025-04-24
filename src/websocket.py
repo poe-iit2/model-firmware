@@ -233,7 +233,7 @@ class GraphQLWs:
         id = self.next_count()
         sub = Subscription(True)
         self.subscriptions[id] = sub
-        sub.data = collections.deque()
+        sub.data = collections.deque((), 10)
 
         message = {
             "id": str(id),

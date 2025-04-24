@@ -8,6 +8,7 @@ import argparse
 files = [
     "config.py",
     "device.py",
+    "hilink.py",
     "led_effects.py",
     "main.py",
     "websocket.py"

@@ -1,6 +1,8 @@
 import machine
 from dht import DHT22
 import asyncio
+import hilink
+import asyncio
 
 led_update_query = """
 subscription ($id: Int = 0) {
@@ -30,7 +32,7 @@ class Device:
             self.dht = None
 
         if "AIR_DIN_PIN" in config:
-            self.din = machine.Pin(config["AIR_DIN_PIN"])
+            self.din = machine.Pin(config["AIR_DIN_PIN"], machine.Pin.IN)
         else:
             self.din = None
 
@@ -40,9 +42,33 @@ class Device:
             self.adc = None
 
         if "PRESENCE_PIN" in config:
-            self.presense = machine.Pin(config["PRESENCE_PIN"])
+            self.presence_pin = machine.Pin(config["PRESENCE_PIN"], machine.Pin.IN)
         else:
-            self.presense = None
+            self.presence_pin = None
+        
+        if "PRESENCE_UART_CONTROLLER" in config:
+            print(f'{config["PRESENCE_UART_CONTROLLER"]} {config["PRESENCE_TX_PIN"]} {config["PRESENCE_RX_PIN"]}')
+            # self.presence_uart = machine.UART(config["PRESENCE_UART_CONTROLLER"], tx=config["PRESENCE_TX_PIN"], rx=config["PRESENCE_RX_PIN"])
+            self.presence = hilink.HiLink(config["PRESENCE_UART_CONTROLLER"], tx=config["PRESENCE_TX_PIN"], rx=config["PRESENCE_RX_PIN"])
+        else:
+            self.presence_uart = None
+            self.presence = None
+
+    async def config_presence(self):
+        if self.presence is None:
+            return
+        print("configuring")
+        await self.presence.enable_config()
+        print("setting resolution")
+        await self.presence.set_resolution(hilink.HiLink.SHORT_RESOLUTION)
+        print("setting running config")
+        await self.presence.run_automatic_config()
+        # each gate is about 7.87 inches
+        print("setting max")
+        await self.presence.set_max_gate_and_duration(2, 2, 5)
+        # print("disabling config")
+        await self.presence.disable_config()
+        print("configured")
 
     async def led_update_handler(self):
         async for s in await self.gql.subscribe({
@@ -64,10 +90,16 @@ class Device:
                 readings["smoke_detected"] = self.din.value() == 1
             if self.adc:
                 readings["airQuality"] = self.adc.read_u16() * 3.3 / (65535)
-            if self.presense:
-                readings["occupied"] = self.presense.value() == 1
+            if self.presence_pin:
+                readings["occupied"] = self.presence_pin.value() == 1
+                print(self.presence_pin.value())
             await self.gql.query({
                 "query": update_sensors_query,
                 "variables": readings
             })
+
+    async def presence_handler(self):
+        if self.presence:
+            asyncio.create_task(self.presence.handler())
+            await self.config_presence()
         
