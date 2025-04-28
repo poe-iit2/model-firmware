@@ -2,7 +2,8 @@ import config
 import asyncio
 import network
 import websocket
-from device import Device 
+from device import Device
+import led_effects
 
 wifi = network.WLAN(network.STA_IF)
 
@@ -26,6 +27,9 @@ async def connnect_to_wifi():
         await asyncio.sleep(1)
 
 async def main():
+    leds = led_effects.LedChain(config.led_pins)
+    segments, led_splitter = led_effects.make_segments(config.led_segments)
+    asyncio.create_task(led_effects.led_engine(leds, led_splitter))
     await connnect_to_wifi()
     ws = websocket.WebSocket()
     await ws.connect(config.GRAPHQL_HOST, config.GRAPHQL_PORT, config.GRAPHQL_PATH)
@@ -56,7 +60,7 @@ async def main():
   }
 }"""}))
     for c in config.devices:
-        device = Device(c, gql)
+        device = Device(c, gql, segments)
         asyncio.create_task(device.led_update_handler())
         asyncio.create_task(device.read_sensors_loop())
         asyncio.create_task(device.presence_handler())

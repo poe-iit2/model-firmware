@@ -4,9 +4,19 @@ import asyncio
 import hilink
 import asyncio
 
-led_update_query = """
+led_update_sub = """
 subscription ($id: Int = 0) {
   ledStateChanged(id: $id)
+}
+"""
+
+led_update_query = """
+query ($id: Int = 0) {
+  model {
+    getDevice(id: $id) {
+      ledState
+    }
+  }
 }
 """
 
@@ -22,9 +32,12 @@ mutation ($id: Int!, $airQuality: Float, $humidity: Float = 1.5, $occupied: Bool
 """
 
 class Device:
-    def __init__(self, config, gql):
+    def __init__(self, config, gql, segments):
         self.config = config
         self.gql = gql
+        self.segments = []
+        for name in config["LED_SEGMENTS"]:
+            self.segments.append(segments[name])
 
         if "DHT_PIN" in config:
             self.dht = DHT22(machine.Pin(config["DHT_PIN"]))
@@ -70,12 +83,36 @@ class Device:
         await self.presence.disable_config()
         print("configured")
 
+    def led_update_state(self, state):
+        if state == "OFF":
+            for s in self.segments:
+                s.off()
+        elif state == "SAFE":
+            for s in self.segments:
+                s.safe()
+        elif state == "EVAC_OCCUPIED":
+            for s in self.segments:
+                s.evac_occupied()
+        elif state == "EVAC_UNOCCUPIED":
+            for s in self.segments:
+                s.evac_unoccupied()
+
     async def led_update_handler(self):
-        async for s in await self.gql.subscribe({
+        # state subscription first so that we don't miss an update between the start of subscriptions and the query
+        sub = await self.gql.subscribe({
+            "query": led_update_sub,
+            "variables": {"id": self.config["id"]}
+        })
+        result = await self.gql.query({
             "query": led_update_query,
             "variables": {"id": self.config["id"]}
-        }):
-            print(s)
+        })
+        self.led_update_state(result["data"]["model"]["getDevice"]["ledState"])
+        async for s in sub:
+            state = s["data"]["ledStateChanged"]
+            self.led_update_state(state)
+
+                
 
     async def read_sensors_loop(self):
         # DO NOT CALL MORE OFTEN THAN EVERY 2 SECONDS

@@ -1,6 +1,8 @@
 # This file is for demonstration, do not include in firmware 
 import time
 
+mock_ajskdnjk = True
+
 time.ticks_ms = lambda: round(time.time()*1000)
 time.ticks_diff = lambda a, b: b-a
 

@@ -9,5 +9,6 @@ class NeoPixel:
         self._leds[idx] = value
 
     def write(self):
+        # return
         print(self._leds)
     

@@ -6,6 +6,8 @@ class HiLink:
     LONG_RESOLUTION = b"\x01\x00"
 
     def __init__(self, controller, tx, rx):
+        if "mock_ajskdnjk" in vars(machine):
+            return
         self.uart = machine.UART(controller, baudrate=256000, bits=8, parity=None, stop=1, tx=tx, rx=rx)
         self.reader = asyncio.StreamReader(self.uart)
         self.writer = asyncio.StreamWriter(self.uart)
@@ -23,6 +25,8 @@ class HiLink:
         return await self.writer.drain()
     
     async def exec(self, command, data):
+        if "mock_ajskdnjk" in vars(machine):
+            return b"\x00\x00"
         async with self.lock:
             self.event.clear()
             await self.send_frame(command.to_bytes(2, "little") + data)
@@ -31,6 +35,9 @@ class HiLink:
             return self.response[2:]
 
     async def handler(self):
+        if "mock_ajskdnjk" in vars(machine):
+            while True:
+                await asyncio.sleep(1)
         while True:
             # print("reading")
             header = await self.reader.readexactly(4)
@@ -105,6 +112,8 @@ class HiLink:
             raise RuntimeError("ACK indicated failure")
         
     async def run_automatic_config(self, duration=10):
+        if "mock_ajskdnjk" in vars(machine):
+            return
         self.auto_config_end.clear()
         await self.begin_automatic_config(duration)
         await self.disable_config()

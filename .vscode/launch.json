@@ -1,0 +1,5 @@
+{
+    "configurations": [
+    {"name":"Python ","type":"debugpy","request":"launch","program":"${workspaceFolder}/src/main.py","console":"integratedTerminal", "env": {"PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/mocks"}}
+    ]
+}
