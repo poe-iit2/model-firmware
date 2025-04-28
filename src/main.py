@@ -37,28 +37,6 @@ async def main():
     await gql.connect()
     asyncio.create_task(gql.handler())
     print("connected")
-    print(await gql.query({"query": """query MyQuery {
-  model {
-    device0: getDevice(id: 0) {
-      airQuality
-      danger
-      evacState
-      humidity
-      ledState
-      occupied
-      temperature
-    }
-    device1: getDevice(id: 1) {
-      airQuality
-      danger
-      evacState
-      humidity
-      ledState
-      occupied
-      temperature
-    }
-  }
-}"""}))
     for c in config.devices:
         device = Device(c, gql, segments)
         asyncio.create_task(device.led_update_handler())

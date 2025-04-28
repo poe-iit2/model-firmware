@@ -4,8 +4,6 @@ import time
 import math
 import machine
 
-leds = neopixel.NeoPixel(machine.Pin(18), 70)
-
 def led_sawtooth(color):
     def update(x):
         y = x % 1
@@ -125,27 +123,3 @@ def make_segments(config):
         if "name" in c:
             segments[c["name"]] = segment
     return (segments, LedSplitter(splitter_config))
-
-# async def main():
-
-#     await led_engine(leds, LedSplitter((
-#         # (led_pulse((128, 64, 0)), 5),
-#         # (led_solid((0, 0, 10)), 5),
-#         # (led_pulse((128, 64, 0)), 5),
-#         # (led_solid((0, 0, 10)), 5),
-#         # (led_pulse((128, 64, 0)), 5),
-#         # (led_solid((0, 0, 10)), 5),
-#         # (led_pulse((128, 64, 0)), 5),
-#         # (led_solid((0, 0, 10)), 5),
-#         # (led_pulse((128, 64, 0)), 5),
-#         # (led_solid((0, 0, 10)), 5),
-        
-#         (led_solid((10, 10, 10)), 49),
-#         # (led_pulse((128, 64, 0)), 5),
-#         # (led_solid((0, 0, 10)), 5),
-#         # (led_pulse((128, 64, 0)), 5),
-#         # (led_solid((0, 0, 10)), 5),
-
-#         )))
-
-# asyncio.run(main())
