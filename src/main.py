@@ -4,6 +4,7 @@ import network
 import websocket
 from device import Device
 import led_effects
+import machine
 
 wifi = network.WLAN(network.STA_IF)
 
@@ -39,9 +40,11 @@ async def main():
     print("connected")
     for c in config.devices:
         device = Device(c, gql, segments)
-        asyncio.create_task(device.led_update_handler())
-        asyncio.create_task(device.read_sensors_loop())
         asyncio.create_task(device.presence_handler())
+        asyncio.create_task(device.led_update_handler())
+        asyncio.create_task(device.read_dht_loop())
+        asyncio.create_task(device.read_misc_loop())
+        asyncio.create_task(device.update_sensors_loop())
 
 loop = asyncio.new_event_loop()
 loop.create_task(main())

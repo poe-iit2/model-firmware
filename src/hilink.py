@@ -1,6 +1,9 @@
 import asyncio
 import machine
 
+def vars(o):
+    return o.__dict__
+
 class HiLink:
     SHORT_RESOLUTION = b"\x00\x00"
     LONG_RESOLUTION = b"\x01\x00"
@@ -16,6 +19,8 @@ class HiLink:
         self.auto_config_end = asyncio.Event()
         self.auto_config_success = False
         self.lock = asyncio.Lock()
+        self.value = False
+        self.ticker = 0
 
     async def send_frame(self, data):
         self.writer.write(b"\xfd\xfc\xfb\xfa"
@@ -38,10 +43,11 @@ class HiLink:
         if "mock_ajskdnjk" in vars(machine):
             while True:
                 await asyncio.sleep(1)
+        k = 0
         while True:
             # print("reading")
             header = await self.reader.readexactly(4)
-            # print(header)
+            # print("read: " + repr(header))
             if header == b"\xfd\xfc\xfb\xfa":
                 n = await self.reader.readexactly(2)
                 n = int.from_bytes(n, "little")
@@ -58,10 +64,18 @@ class HiLink:
                 assert data[-2] == 0x55
                 assert data[-1] == 0x00
                 data = data[2:-2]
-                print("Radar: " + data.hex(" "))
+                k+=1
+                print(str(k) + " Radar: " + data.hex(" "))
                 if data[0] == 0x05 or data[0] == 0x06:
                     self.auto_config_success = data[0] == 0x05
                     self.auto_config_end.set()
+                if data[0]:
+                    self.ticker += 1
+                else:
+                    self.ticker = 0
+                # self.value = data[0] != 0
+
+                    
 
     async def enable_config(self):
         result = await self.exec(0x00ff, b"\x01\x00")

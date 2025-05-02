@@ -24,6 +24,7 @@ src = os.path.join(cwd, "../src")
 subprocess.run([
     sys.executable, "-m", "mpremote",
     *(("connect", args.port) if args.port else ()),
-    "fs", "cp", *(os.path.join(src, file) for file in files), ":/"
+    "fs", "cp", *(os.path.join(src, file) for file in files), ":/", "+",
+    "reset"
 ])
 

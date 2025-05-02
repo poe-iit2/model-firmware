@@ -21,10 +21,10 @@ query ($id: Int = 0) {
 """
 
 update_sensors_query = """
-mutation ($id: Int!, $airQuality: Float, $humidity: Float = 1.5, $occupied: Boolean, $temperature: Float) {
+mutation ($id: Int!, $airQuality: Float, $humidity: Float = 1.5, $occupied: Boolean, $temperature: Float, $smokeDetected: Boolean) {
     updateSensors(
         id: $id
-        sensors: {airQuality: $airQuality, humidity: $humidity, temperature: $temperature, occupied: $occupied}
+        sensors: {airQuality: $airQuality, humidity: $humidity, temperature: $temperature, occupied: $occupied, smokeDetected: $smokeDetected}
     ) {
         success
     }
@@ -36,6 +36,12 @@ class Device:
         self.config = config
         self.gql = gql
         self.segments = []
+        self.temperature = None
+        self.humidity = None
+        self.smokeDetected = None
+        self.occupied = None
+        self.airQuality = None
+
         for name in config["LED_SEGMENTS"]:
             self.segments.append(segments[name])
 
@@ -70,17 +76,26 @@ class Device:
     async def config_presence(self):
         if self.presence is None:
             return
-        print("configuring")
-        await self.presence.enable_config()
-        print("setting resolution")
-        await self.presence.set_resolution(hilink.HiLink.SHORT_RESOLUTION)
-        print("setting running config")
-        await self.presence.run_automatic_config()
-        # each gate is about 7.87 inches
-        print("setting max")
-        await self.presence.set_max_gate_and_duration(2, 2, 5)
+        # print("configuring")
+        # await self.presence.enable_config()
+        # print("setting resolution")
+        # await self.presence.set_resolution(hilink.HiLink.SHORT_RESOLUTION)
+        # print("setting running config")
+        # # await self.presence.run_automatic_config()
+        # # each gate is about 7.87 inches
+        # print("setting max")
+        # await self.presence.set_max_gate_and_duration(1, 0, 1)
+        # await self.presence.set_gate_sensitivity(0, 99, 100)
+        # await self.presence.set_gate_sensitivity(1, 99, 100)
+        # await self.presence.set_gate_sensitivity(2, 100, 100)
+        # await self.presence.set_gate_sensitivity(3, 100, 100)
+        # await self.presence.set_gate_sensitivity(4, 100, 100)
+        # await self.presence.set_gate_sensitivity(5, 100, 100)
+        # await self.presence.set_gate_sensitivity(6, 100, 100)
+        # await self.presence.set_gate_sensitivity(7, 100, 100)
+        # await self.presence.set_gate_sensitivity(8, 100, 100)
         # print("disabling config")
-        await self.presence.disable_config()
+        # await self.presence.disable_config()
         print("configured")
 
     def led_update_state(self, state):
@@ -112,24 +127,45 @@ class Device:
             state = s["data"]["ledStateChanged"]
             self.led_update_state(state)
 
-                
+    async def read_dht_loop(self):
+        while self.dht:
+            await asyncio.sleep(5)  # DO NOT MEASURE MORE OFTEN THAN EVERY 2 SECONDS
+            self.dht.measure()
+            self.temperature = self.dht.temperature()
+            self.humidity = self.dht.humidity()
 
-    async def read_sensors_loop(self):
-        # DO NOT CALL MORE OFTEN THAN EVERY 2 SECONDS
+    async def read_misc_loop(self):
         while True:
             await asyncio.sleep(2)
+            if self.din:
+                self.smokeDetected = self.din.value() == 1
+            if self.adc:
+                self.airQuality = self.adc.read_u16() * 3.3 / (65535)
+
+    async def update_sensors_loop(self):
+        while True:
+            await asyncio.sleep(0.25)
+            if self.din:
+                self.smokeDetected = self.din.value() == 0
+            if self.adc:
+                self.airQuality = self.adc.read_u16() * 3.3 / (65535)
+            # if self.dht:
+            #     self.dht.measure()
+            #     self.temperature = self.dht.temperature()
+            #     self.humidity = self.dht.humidity()
+            
+            
             readings = {"id": self.config["id"]}
             if self.dht:
-                self.dht.measure() # DO NOT MEASURE MORE OFTEN THAN EVERY 2 SECONDS
-                readings["temperature"] = self.dht.temperature()
-                readings["humidity"] = self.dht.humidity()
+                readings["temperature"] = self.temperature
+                readings["humidity"] = self.humidity
             if self.din:
-                readings["smoke_detected"] = self.din.value() == 1
+                readings["smokeDetected"] = self.smokeDetected
             if self.adc:
-                readings["airQuality"] = self.adc.read_u16() * 3.3 / (65535)
-            if self.presence_pin:
-                readings["occupied"] = self.presence_pin.value() == 1
-                print(self.presence_pin.value())
+                readings["airQuality"] = self.airQuality
+            if self.presence:
+                readings["occupied"] = self.presence.ticker > 5
+            # print(readings)
             await self.gql.query({
                 "query": update_sensors_query,
                 "variables": readings
@@ -138,5 +174,6 @@ class Device:
     async def presence_handler(self):
         if self.presence:
             asyncio.create_task(self.presence.handler())
+            asyncio.sleep(1)
             await self.config_presence()
         
