@@ -1,4 +1,3 @@
-# These requirements are only for scripts under utils/
-
-esptool
-mpremote
+rpi_ws281x
+adafruit-circuitpython-neopixel
+RPi.GPIO
