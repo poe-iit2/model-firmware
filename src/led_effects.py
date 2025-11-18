@@ -102,7 +102,7 @@ class LedChain:
     def __init__(self, config):
         self.config = []
         for c in config:
-            self.config.append((neopixel.NeoPixel(c["PIN"], c["COUNT"]), c["COUNT"]))
+            self.config.append((neopixel.NeoPixel(c["PIN"], c["COUNT"], auto_write=False), c["COUNT"]))
 
     def __setitem__(self, i, x):
         j = 0
