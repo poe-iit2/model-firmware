@@ -2,7 +2,7 @@ import asyncio
 import neopixel
 import time
 import math
-import machine
+# import machine
 
 def led_sawtooth(color):
     def update(x):
@@ -102,7 +102,7 @@ class LedChain:
     def __init__(self, config):
         self.config = []
         for c in config:
-            self.config.append((neopixel.NeoPixel(machine.Pin(c["PIN"]), c["COUNT"]), c["COUNT"]))
+            self.config.append((neopixel.NeoPixel(c["PIN"], c["COUNT"]), c["COUNT"]))
 
     def __setitem__(self, i, x):
         j = 0
@@ -119,9 +119,9 @@ class LedChain:
                 return leds[i-j]
             j += n
     
-    def write(self):
+    def show(self):
         for leds, _ in self.config:
-            leds.write()
+            leds.show()
 
 class LedSplitter:
     def __init__(self, config):
@@ -137,7 +137,7 @@ async def led_engine(leds, f, l=0):
     while True:
         await asyncio.sleep(0.01)
         f(leds, time.ticks_diff(t0, time.ticks_ms()) / 1000, 0, l)
-        leds.write()
+        leds.show()
 
 def make_segments(config):
     segments = {}
