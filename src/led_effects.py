@@ -133,10 +133,10 @@ class LedSplitter:
             off += i
 
 async def led_engine(leds, f, l=0):
-    t0 = time.ticks_ms()
+    t0 = time.monotonic()
     while True:
         await asyncio.sleep(0.01)
-        f(leds, time.ticks_diff(t0, time.ticks_ms()) / 1000, 0, l)
+        f(leds, (time.monotonic()-t0) / 1000, 0, l)
         leds.show()
 
 def make_segments(config):
