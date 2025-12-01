@@ -79,18 +79,21 @@ class LedSegment:
         else:
             self.effect = led_solid((0,0,0))
 
-    def evac_occupied(self):
+    def evac_left(self):
         self.effect = led_wave(led_sin((0,255,10)), 7.5, 1.5)
 
-    def evac_unoccupied(self):
-        self.effect = led_solid((10, 0, 0))
+    def evac_right(self):
+        self.effect = led_wave(led_sin((0,255,10)), -7.5, 1.5)
+
+    def danger(self):
+        self.effect = led_solid((255, 0, 0))
         # self.effect = led_wave(led_sin((64,0,0)), 15, 0.75)
 
     def off(self):
         self.effect = led_solid((0,0,0))
 
     def safe(self):
-        self.effect = led_solid((10,10,10))
+        self.effect = led_solid((255,255,255))
     
     def __call__(self, leds, t, off=0, l=0):
         effect = self.effect

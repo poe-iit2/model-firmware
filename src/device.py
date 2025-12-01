@@ -103,12 +103,15 @@ class Device:
         elif state == "SAFE":
             for s in self.segments:
                 s.safe()
-        elif state == "EVAC_OCCUPIED":
+        elif state == "DANGER":
             for s in self.segments:
-                s.evac_occupied()
-        elif state == "EVAC_UNOCCUPIED":
+                s.danger()
+        elif state == "EVAC_LEFT":
             for s in self.segments:
-                s.evac_unoccupied()
+                s.evac_left()
+        elif state == "EVAC_RIGHT":
+            for s in self.segments:
+                s.evac_right()
 
     async def led_update_handler(self):
         # state subscription first so that we don't miss an update between the start of subscriptions and the query
