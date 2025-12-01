@@ -7,50 +7,46 @@ GRAPHQL_PATH = "/"
 led_pins = [
     {
         "PIN": board.D18,
-        "COUNT": 120
+        "COUNT": 56
     },
 ]
 
 led_segments = [
     {
-        "name": "HALL",
-        "color": (10,10,10),
-        "span": 26,
+        "name": "HALL3",
+        "span": 14,
         "reversed": False
     },
     {
-        "name": "ROOM2R",
-        # "color": (10,10,10),
-        "span": 19,
+        "name": "HALL2",
+        "span": 13,
         "reversed": False
     },
         {
-        "name": "ROOM2L",
-        # "color": (10,10,10),
-        "span": 19,
-        "reversed": True
-    },
-        {
-        "name": "ROOM1R",
-        # "color": (10,10,10),
-        "span": 19,
+        "name": "HALL1",
+        "span": 14,
         "reversed": False
     },
-    {
-        "name": "ROOM1L",
-        # "color": (10,10,10),
-        "span": 19,
-        "reversed": True
+        {
+        "name": "HALL0",
+        "span": 15,
+        "reversed": False
     },
 ]
 
 devices = (
     {
         "id": 0,
-        "LED_SEGMENTS": ["ROOM1R", "ROOM1L"],
-        # "AIR_DIN_PIN": ,
+        "LED_SEGMENTS": ["HALL0"],
     }, {
         "id": 1,
-        "LED_SEGMENTS": ["ROOM2R", "ROOM2L"],
-    },
+        "LED_SEGMENTS": ["HALL1"],
+    }, {
+        "id": 2,
+        "LED_SEGMENTS": ["HALL2"],
+    }, {
+        "id": 3,
+        "LED_SEGMENTS": ["HALL3"],
+        "AIR_DIN_PIN": board.D23
+    }
 )
