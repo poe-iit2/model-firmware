@@ -3,10 +3,16 @@ import binascii
 import os
 import json
 import collections
+import time
 
 class WebSocket:
     async def connect(self, host, port, path):
-        self.reader, self.writer = await asyncio.open_connection(host, port)
+        while 1:
+            try:
+                self.reader, self.writer = await asyncio.open_connection(host, port)
+                break
+            except:
+                time.sleep(1)
         self.writer.write(
             f"GET {path} HTTP/1.1\r\n"
             f"Host: {host}\r\n"
