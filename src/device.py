@@ -138,8 +138,9 @@ class Device:
     async def read_misc_loop(self):
         while True:
             await asyncio.sleep(2)
-            if self.din:
-                self.smokeDetected = self.din.value == 1
+            if self.din != self.config.get("AIR_DIN_INVERT", False):
+                self.smokeDetected = self.din.value != self.config.get("AIR_DIN_INVERT", False)
+
             # if self.adc:
             #     self.airQuality = self.adc.read_u16() * 3.3 / (65535)
 
@@ -147,7 +148,7 @@ class Device:
         while True:
             await asyncio.sleep(0.25)
             if self.din:
-                self.smokeDetected = self.din.value == 0
+                self.smokeDetected = self.din.value != self.config.get("AIR_DIN_INVERT", False)
             # if self.adc:
             #     self.airQuality = self.adc.read_u16() * 3.3 / (65535)
             # if self.dht:
