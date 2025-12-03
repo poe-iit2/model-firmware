@@ -1,0 +1,10 @@
+[Service]
+Type=simple
+ExecStart=/opt/model-firmware/venv/bin/python3 main.py
+WorkingDirectory=/opt/model-firmware/src
+
+[Unit]
+Requires=model-server.service
+
+[Install]
+WantedBy=multi-user.target
